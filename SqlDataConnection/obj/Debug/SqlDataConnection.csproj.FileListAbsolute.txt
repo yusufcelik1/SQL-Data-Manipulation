@@ -1,0 +1,8 @@
+G:\AcunMedyaAkademi\Lessons\SqlDataConnection\bin\Debug\SqlDataConnection.exe.config
+G:\AcunMedyaAkademi\Lessons\SqlDataConnection\bin\Debug\SqlDataConnection.exe
+G:\AcunMedyaAkademi\Lessons\SqlDataConnection\bin\Debug\SqlDataConnection.pdb
+G:\AcunMedyaAkademi\Lessons\SqlDataConnection\obj\Debug\SqlDataConnection.csproj.AssemblyReference.cache
+G:\AcunMedyaAkademi\Lessons\SqlDataConnection\obj\Debug\SqlDataConnection.csproj.SuggestedBindingRedirects.cache
+G:\AcunMedyaAkademi\Lessons\SqlDataConnection\obj\Debug\SqlDataConnection.csproj.CoreCompileInputs.cache
+G:\AcunMedyaAkademi\Lessons\SqlDataConnection\obj\Debug\SqlDataConnection.exe
+G:\AcunMedyaAkademi\Lessons\SqlDataConnection\obj\Debug\SqlDataConnection.pdb
