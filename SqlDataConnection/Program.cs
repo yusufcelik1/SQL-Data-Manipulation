@@ -1,137 +1,72 @@
 using System;
-using System.Data;
-using System.Data.SqlClient;
-using System.Runtime.CompilerServices;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading;
+using excel = Microsoft.Office.Interop.Excel;
+using Microsoft.Office.Interop.Excel;
 
-public class SqlDataConnection
+namespace FileCopying
 {
-    private static SqlConnection connection;
-
-    static void Main()
+    class ExcelWriter
     {
-        // Establishing the connection to the database
-        string connectionString = "Server=.; Database=VeriTabaniBaglanti; Trusted_Connection=SSPI; MultipleActiveResultSets=true; TrustServerCertificate=true;";
-        connection = new SqlConnection(connectionString);
-        connection.Open();
-
-        // Displaying menu options for user input
-        Console.WriteLine("Enter the number of the operation you want to perform");
-        Console.WriteLine("1 - Add Data");
-        Console.WriteLine("2 - Update Data");
-        Console.WriteLine("3 - Delete Data");
-        Console.WriteLine("4 - List Data");
-        int choice = Convert.ToInt32(Console.ReadLine());
-
-        switch (choice)
+        public void ConvertTextToExcel()
         {
-            case 1: // Adding Data
-                Console.Write("Enter your first name: ");
-                string firstName = Console.ReadLine();
-                Console.Write("Enter your last name: ");
-                string lastName = Console.ReadLine();
-                Console.Write("Enter your department: ");
-                string department = Console.ReadLine();
-                Console.Write("Enter your gender: ");
-                string gender = Console.ReadLine();
-                VeriEkle(firstName, lastName, department, gender);
-                break;
-
-            case 2: // Updating Data
-                Console.Write("Enter the student's school number to update: ");
-                int schoolNumber = Convert.ToInt32(Console.ReadLine());
-                Console.Write("Enter your first name: ");
-                firstName = Console.ReadLine();
-                Console.Write("Enter your last name: ");
-                lastName = Console.ReadLine();
-                Console.Write("Enter your department: ");
-                department = Console.ReadLine();
-                Console.Write("Enter your gender: ");
-                gender = Console.ReadLine();
-                VeriGuncelle(schoolNumber, firstName, lastName, department, gender);
-                break;
-
-            case 3: // Deleting Data
-                Console.Write("Enter the school number of the student you want to delete: ");
-                int studentNumber = Convert.ToInt32(Console.ReadLine());
-                VeriSil(studentNumber);
-                break;
-
-            case 4: // Listing Data
-                VeriListele();
-                break;
-        }
-
-        // Closing the database connection
-        connection.Close();
-    }
-
-    // Methods to perform CRUD operations
-
-    // Add data to the database
-    public static void VeriEkle(string firstName, string lastName, string department, string gender)
-    {
-        string query = "INSERT INTO KutuphaneKayit (ad, soyad, bolum, cinsiyet) VALUES (@Ad, @Soyad, @Bolum, @Cinsiyet)";
-
-        using (SqlCommand command = new SqlCommand(query, connection))
-        {
-            command.Parameters.AddWithValue("@Ad", firstName);
-            command.Parameters.AddWithValue("@Soyad", lastName);
-            command.Parameters.AddWithValue("@Bolum", department);
-            command.Parameters.AddWithValue("@Cinsiyet", gender);
-            command.ExecuteNonQuery();
-        }
-        Console.WriteLine("Data added.");
-    }
-
-    // Update data in the database
-    public static void VeriGuncelle(int schoolNumber, string firstName, string lastName, string department, string gender)
-    {
-        string query = "UPDATE KutuphaneKayit SET ad = @Ad, soyad = @Soyad, bolum = @Bolum, cinsiyet = @Cinsiyet WHERE onumarasi = @ONumarasi";
-
-        using (SqlCommand command = new SqlCommand(query, connection))
-        {
-            command.Parameters.AddWithValue("@ONumarasi", schoolNumber);
-            command.Parameters.AddWithValue("@Ad", firstName);
-            command.Parameters.AddWithValue("@Soyad", lastName);
-            command.Parameters.AddWithValue("@Bolum", department);
-            command.Parameters.AddWithValue("@Cinsiyet", gender);
-            command.ExecuteNonQuery();
-        }
-        Console.WriteLine("Data updated.");
-    }
-
-    // Delete data from the database
-    public static void VeriSil(int schoolNumber)
-    {
-        string query = "DELETE FROM KutuphaneKayit WHERE onumarasi = @ONumarasi";
-
-        using (SqlCommand command = new SqlCommand(query, connection))
-        {
-            command.Parameters.AddWithValue("@ONumarasi", schoolNumber);
-            command.ExecuteNonQuery();
-        }
-        Console.WriteLine("Data deleted.");
-    }
-
-    // List data from the database
-    public static void VeriListele()
-    {
-        string query = "SELECT * FROM KutuphaneKayit";
-
-        using (SqlCommand command = new SqlCommand(query, connection))
-        {
-            using (SqlDataReader reader = command.ExecuteReader())
+            #region Initialization
+            string[] InputNamesLine = File.ReadAllLines(@""); // Replace with your text file location
+            excel.Application oXL;
+            excel._Workbook oWB;
+            excel._Worksheet oSheet;
+            excel.Range oRng;
+            object misvalue = System.Reflection.Missing.Value;
+            #endregion
+            try
             {
-                while (reader.Read())
+                // Start Excel and create the application object
+                oXL = new excel.Application() { Visible = true };
+
+                // Create a new workbook
+                oWB = (excel._Workbook)(oXL.Workbooks.Add(""));
+                oSheet = (excel._Worksheet)oWB.ActiveSheet;
+
+                // Add table headers in the first row
+                oSheet.Cells[1, 1] = "Parameter Names";
+                oSheet.Cells[1, 2] = "Values";
+
+                // Format the headers
+                oSheet.get_Range("A1", "B1").Font.Bold = true;
+                oSheet.get_Range("A1", "B1").VerticalAlignment = excel.XlVAlign.xlVAlignCenter;
+
+                int rowIndex = 2; // Start adding data from the second row
+                foreach (string line in InputNamesLine)
                 {
-                    int schoolNumber = reader.GetInt32(0);
-                    string firstName = reader.GetString(1);
-                    string lastName = reader.GetString(2);
-                    string department = reader.GetString(3);
-                    string gender = reader.GetString(4);
-                    Console.WriteLine($"School Number: {schoolNumber}\nFirst Name: {firstName}\nLast Name: {lastName}\nDepartment: {department}\nGender: {gender}\n");
+                    if (!string.IsNullOrEmpty(line))
+                    {
+                        string[] columns = line.Split(' ', '\r');
+                        string column1 = columns[0];
+                        string column2 = columns[1];
+
+                        oSheet.Cells[rowIndex, 1] = column1;
+                        oSheet.Cells[rowIndex, 2] = column2;
+                        
+                        rowIndex++;
+                    }
                 }
-                Console.ReadKey();
+
+                Thread.Sleep(5000); // Delay for visualization
+
+                // Save the Excel workbook
+                oRng = oSheet.get_Range("A1", "B1");
+                oXL.DisplayAlerts = false; // Suppress display alerts
+                oWB.SaveAs(@"LocationWriteHere.xlsx", Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Microsoft.Office.Interop.Excel.XlSaveAsAccessMode.xlNoChange, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
+
+                // Close the workbook and Excel application
+                oWB.Close();
+                oXL.Quit();
+            }
+            catch (Exception e)
+            {
+                // Display an error message in case of an exception
+                System.Windows.Forms.MessageBox.Show("Exception: " + e);
             }
         }
     }
