@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Runtime.CompilerServices;
@@ -7,123 +7,132 @@ public class SqlDataConnection
 {
     private static SqlConnection connection;
 
-    #region Veri Girişi
     static void Main()
     {
-        
-        Console.WriteLine("Yapmak istediğiniz işlemin sayısını yazınız");
-        Console.WriteLine("1 - Veri Ekleme");
-        Console.WriteLine("2 - Veri Güncelleme");
-        Console.WriteLine("3 - Veri Silme");
-        Console.WriteLine("4 - Veriyi Listeleme");
-        int secim = Convert.ToInt32(Console.ReadLine());
+        // Establishing the connection to the database
         string connectionString = "Server=.; Database=VeriTabaniBaglanti; Trusted_Connection=SSPI; MultipleActiveResultSets=true; TrustServerCertificate=true;";
         connection = new SqlConnection(connectionString);
         connection.Open();
-        switch (secim)
+
+        // Displaying menu options for user input
+        Console.WriteLine("Enter the number of the operation you want to perform");
+        Console.WriteLine("1 - Add Data");
+        Console.WriteLine("2 - Update Data");
+        Console.WriteLine("3 - Delete Data");
+        Console.WriteLine("4 - List Data");
+        int choice = Convert.ToInt32(Console.ReadLine());
+
+        switch (choice)
         {
-            case 1:
-                Console.Write("Adınızı giriniz: ");
-                string ad = Console.ReadLine();
-                Console.Write("Soyadınızı giriniz: ");
-                string soyad = Console.ReadLine();
-                Console.Write("Bolumunuzu giriniz: ");
-                string bolum = Console.ReadLine();
-                Console.Write("Cinsiyetinizi giriniz: ");
-                string cinsiyet = Console.ReadLine();
-                VeriEkle(ad, soyad, bolum, cinsiyet);
+            case 1: // Adding Data
+                Console.Write("Enter your first name: ");
+                string firstName = Console.ReadLine();
+                Console.Write("Enter your last name: ");
+                string lastName = Console.ReadLine();
+                Console.Write("Enter your department: ");
+                string department = Console.ReadLine();
+                Console.Write("Enter your gender: ");
+                string gender = Console.ReadLine();
+                VeriEkle(firstName, lastName, department, gender);
                 break;
-            case 2:
-                Console.Write("Bilgilerini güncellemek istediğiniz öğrencinin okul numarasını giriniz: ");
-                int onumarasi = Convert.ToInt32(Console.ReadLine());
-                Console.Write("Adınızı giriniz: ");
-                ad = Console.ReadLine();
-                Console.Write("Soyadınızı giriniz: ");
-                soyad = Console.ReadLine();
-                Console.Write("Bolumunuzu giriniz: ");
-                bolum = Console.ReadLine();
-                Console.Write("Cinsiyetinizi giriniz: ");
-                cinsiyet = Console.ReadLine();
-                VeriGuncelle(onumarasi, ad, soyad, bolum, cinsiyet);
+
+            case 2: // Updating Data
+                Console.Write("Enter the student's school number to update: ");
+                int schoolNumber = Convert.ToInt32(Console.ReadLine());
+                Console.Write("Enter your first name: ");
+                firstName = Console.ReadLine();
+                Console.Write("Enter your last name: ");
+                lastName = Console.ReadLine();
+                Console.Write("Enter your department: ");
+                department = Console.ReadLine();
+                Console.Write("Enter your gender: ");
+                gender = Console.ReadLine();
+                VeriGuncelle(schoolNumber, firstName, lastName, department, gender);
                 break;
-            case 3:
-                Console.Write("Bilgilerini silmek istediğiniz öğrencinin okul numarasını giriniz: ");
-                int numara = Convert.ToInt32(Console.ReadLine());
-                VeriSil(numara);
+
+            case 3: // Deleting Data
+                Console.Write("Enter the school number of the student you want to delete: ");
+                int studentNumber = Convert.ToInt32(Console.ReadLine());
+                VeriSil(studentNumber);
                 break;
-            case 4:
+
+            case 4: // Listing Data
                 VeriListele();
                 break;
         }
+
+        // Closing the database connection
         connection.Close();
     }
-    #endregion
-    #region VeriEkle
-    public static void VeriEkle(string ad, string soyad, string bolum, string cinsiyet)
+
+    // Methods to perform CRUD operations
+
+    // Add data to the database
+    public static void VeriEkle(string firstName, string lastName, string department, string gender)
     {
         string query = "INSERT INTO KutuphaneKayit (ad, soyad, bolum, cinsiyet) VALUES (@Ad, @Soyad, @Bolum, @Cinsiyet)";
 
         using (SqlCommand command = new SqlCommand(query, connection))
         {
-            command.Parameters.AddWithValue("@Ad", ad);
-            command.Parameters.AddWithValue("@Soyad", soyad);
-            command.Parameters.AddWithValue("@Bolum", bolum);
-            command.Parameters.AddWithValue("@Cinsiyet", cinsiyet);
+            command.Parameters.AddWithValue("@Ad", firstName);
+            command.Parameters.AddWithValue("@Soyad", lastName);
+            command.Parameters.AddWithValue("@Bolum", department);
+            command.Parameters.AddWithValue("@Cinsiyet", gender);
             command.ExecuteNonQuery();
         }
-        Console.WriteLine("Veri eklendi.");
+        Console.WriteLine("Data added.");
     }
-    #endregion
-    #region VeriGüncelle
-    public static void VeriGuncelle(int onumarasi, string ad, string soyad, string bolum, string cinsiyet)
+
+    // Update data in the database
+    public static void VeriGuncelle(int schoolNumber, string firstName, string lastName, string department, string gender)
     {
         string query = "UPDATE KutuphaneKayit SET ad = @Ad, soyad = @Soyad, bolum = @Bolum, cinsiyet = @Cinsiyet WHERE onumarasi = @ONumarasi";
+
         using (SqlCommand command = new SqlCommand(query, connection))
         {
-            command.Parameters.AddWithValue("@Onumarasi", onumarasi);
-            command.Parameters.AddWithValue("@Ad", ad);
-            command.Parameters.AddWithValue("@Soyad", soyad);
-            command.Parameters.AddWithValue("@Bolum", bolum);
-            command.Parameters.AddWithValue("@Cinsiyet", cinsiyet);
+            command.Parameters.AddWithValue("@ONumarasi", schoolNumber);
+            command.Parameters.AddWithValue("@Ad", firstName);
+            command.Parameters.AddWithValue("@Soyad", lastName);
+            command.Parameters.AddWithValue("@Bolum", department);
+            command.Parameters.AddWithValue("@Cinsiyet", gender);
             command.ExecuteNonQuery();
         }
-        Console.WriteLine("Veri güncellendi.");
+        Console.WriteLine("Data updated.");
     }
-    #endregion
-    #region VeriSil
-    public static void VeriSil(int onumarasi)
+
+    // Delete data from the database
+    public static void VeriSil(int schoolNumber)
     {
         string query = "DELETE FROM KutuphaneKayit WHERE onumarasi = @ONumarasi";
 
         using (SqlCommand command = new SqlCommand(query, connection))
         {
-            command.Parameters.AddWithValue("@ONumarasi", onumarasi);
+            command.Parameters.AddWithValue("@ONumarasi", schoolNumber);
             command.ExecuteNonQuery();
         }
-
-        Console.WriteLine("Veri silindi.");
+        Console.WriteLine("Data deleted.");
     }
-    #endregion
-    #region VeriListele
+
+    // List data from the database
     public static void VeriListele()
     {
         string query = "SELECT * FROM KutuphaneKayit";
+
         using (SqlCommand command = new SqlCommand(query, connection))
         {
             using (SqlDataReader reader = command.ExecuteReader())
             {
                 while (reader.Read())
                 {
-                    int onumarasi = reader.GetInt32(0);
-                    string ad = reader.GetString(1);
-                    string soyad = reader.GetString(2);
-                    string bolum = reader.GetString(3);
-                    string cinsiyet = reader.GetString(4);
-                    Console.WriteLine($"Öğrenci Numarasi: {onumarasi}\nAd:{ad}\nSoyad: {soyad}\nBolum: {bolum}\nCinsiyet :{cinsiyet}\n");
+                    int schoolNumber = reader.GetInt32(0);
+                    string firstName = reader.GetString(1);
+                    string lastName = reader.GetString(2);
+                    string department = reader.GetString(3);
+                    string gender = reader.GetString(4);
+                    Console.WriteLine($"School Number: {schoolNumber}\nFirst Name: {firstName}\nLast Name: {lastName}\nDepartment: {department}\nGender: {gender}\n");
                 }
                 Console.ReadKey();
             }
         }
     }
-    #endregion
 }
